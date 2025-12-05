@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>勞保老年年金速算工具</title>
+
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+  <!-- Material Design Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: 'Noto Sans TC', sans-serif;
+      background: #F5F5F5;
+      color: #333;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #212121;
+      letter-spacing: 0.5px;
+    }
+
+    label {
+      display: block;
+      margin-top: 16px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #444;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 14px;
+      margin-top: 6px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #6200EE;
+      box-shadow: 0 0 0 2px rgba(98,0,238,0.2);
+    }
+
+    /* Material UI Ripple Button */
+    .md-button {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      padding: 14px;
+      margin-top: 24px;
+      border: none;
+      background: #6200EE;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .md-button:hover {
+      background: #4A00C8;
+    }
+
+    .md-button .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.35);
+      transform: scale(0);
+      animation: ripple-effect 0.6s linear;
+    }
+
+    @keyframes ripple-effect {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .result-card {
+      margin-top: 20px;
+      padding: 16px;
+      background: #EDE7F6;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .result-line {
+      margin-top: 10px;
+      font-size: 1.05rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .highlight {
+      font-weight: 700;
+      color: #6200EE;
+      font-size: 1.25rem;
+    }
+
+    .subtext {
+      font-size: 0.85rem;
+      color: #555;
+      margin-top: 6px;
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 1.3rem; }
+      input, select { font-size: 1rem; padding: 12px; }
+      .result-line { font-size: 1rem; }
+      .highlight { font-size: 1.15rem; }
+    }
+
+    a.link {
+      display: inline-block;
+      margin-top: 20px;
+      font-size: 0.95rem;
+      color: #2962FF;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>勞保老年年金速算工具</h1>
+
+  <label>平均月投保薪資（元）</label>
+  <input id="salary" type="number" placeholder="例如：45800">
+
+  <label>投保年資（年）</label>
+  <input id="years" type="number" placeholder="例如：35">
+
+  <label>開始領取年齡</label>
+  <select id="age">
+    <option value="60">60 歲（提前 5 年）</option>
+    <option value="61">61 歲（提前 4 年）</option>
+    <option value="62">62 歲（提前 3 年）</option>
+    <option value="63">63 歲（提前 2 年）</option>
+    <option value="64">64 歲（提前 1 年）</option>
+    <option value="65" selected>65 歲（正常請領）</option>
+    <option value="66">66 歲（延後 1 年）</option>
+    <option value="67">67 歲（延後 2 年）</option>
+    <option value="68">68 歲（延後 3 年）</option>
+    <option value="69">69 歲（延後 4 年）</option>
+    <option value="70">70 歲（延後 5 年）</option>
+  </select>
+
+  <button class="md-button" onclick="calc(event)">立即計算</button>
+
+  <div id="result" class="result-card">
+    <div class="result-line">
+      <span>公式一：</span>
+      <span id="f1"></span>
+    </div>
+    <div class="result-line">
+      <span>公式二：</span>
+      <span id="f2"></span>
+    </div>
+    <div class="result-line">
+      <span>擇優基礎金額：</span>
+      <span id="base" class="highlight"></span>
+    </div>
+    <div class="result-line">
+      <span>調整後給付：</span>
+      <span id="final" class="highlight"></span>
+    </div>
+    <div id="adjText" class="subtext"></div>
+  </div>
+
+  <!-- 官方級距連結 -->
+  <a class="link" href="https://www.bli.gov.tw/0005475.html" target="_blank">
+    ➤ 查看最新勞保投保薪資級距（官方連結）
+  </a>
+</div>
+
+<script>
+// Ripple Effect
+document.querySelectorAll('.md-button').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    const circle = document.createElement("span");
+    circle.classList.add("ripple");
+    const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${e.clientX - btn.offsetLeft - diameter / 2}px`;
+    circle.style.top = `${e.clientY - btn.offsetTop - diameter / 2}px`;
+    btn.appendChild(circle);
+    setTimeout(() => circle.remove(), 600);
+  });
+});
+
+// Main Calculator
+function calc() {
+  const salary = Number(document.getElementById("salary").value);
+  const years = Number(document.getElementById("years").value);
+  const age = Number(document.getElementById("age").value);
+
+  if (!salary || !years) {
+    alert("請輸入『平均薪資』與『投保年資』");
+    return;
+  }
+
+  // Formula 1 & 2
+  const f1 = salary * years * 0.00775 + 3000;
+  const f2 = salary * years * 0.0155;
+  const base = Math.max(f1, f2);
+
+  // Age adjustment
+  let diff = age - 65; // negative = 提前, positive = 延後
+  let rate = diff * 0.04;
+  rate = Math.max(Math.min(rate, 0.20), -0.20); // limit ±20%
+
+  const final = base * (1 + rate);
+
+  // Display results
+  document.getElementById("f1").innerText = Math.round(f1).toLocaleString() + " 元";
+  document.getElementById("f2").innerText = Math.round(f2).toLocaleString() + " 元";
+  document.getElementById("base").innerText = Math.round(base).toLocaleString() + " 元";
+  document.getElementById("final").innerText = Math.round(final).toLocaleString() + " 元";
+
+  // Adjustment text
+  let adjMsg = "";
+  if (diff < 0) adjMsg = `提前 ${Math.abs(diff)} 年，減給 ${(Math.abs(rate)*100).toFixed(0)}%`;
+  else if (diff > 0) adjMsg = `延後 ${diff} 年，增給 ${(rate*100).toFixed(0)}%`;
+  else adjMsg = "正常請領，無增減給";
+
+  document.getElementById("adjText").innerText = adjMsg;
+
+  document.getElementById("result").style.display = "block";
+}
+</script>
+
+</body>
+</html>
